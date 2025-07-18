@@ -1,70 +1,60 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Typography, Alert, CircularProgress, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { useApi } from '../hooks/useApi';
+import AnalyticsTable from '../components/AnalyticsTable';
+import AnalyticsSummary from '../components/AnalyticsSummary';
+import ScoreChart from '../components/ScoreChart';
 
 const AnalyticsPage = () => {
   const { photoId } = useParams();
+  const { getAnalytics, loading, error } = useApi();
   const [analytics, setAnalytics] = useState([]);
-  const [error, setError] = useState('');
-  const { getAnalytics, loading, error: apiError } = useApi();
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
         const data = await getAnalytics(photoId);
-        setAnalytics(data.analytics);
-        setError('');
+        setAnalytics(data.analytics || []);
       } catch (err) {
-        setError(apiError || 'Failed to load analytics');
-        setAnalytics([]);
+        // Error is handled by useApi hook
       }
     };
-    fetchAnalytics();
-  }, [photoId, getAnalytics, apiError]);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
+    fetchAnalytics();
+  }, [photoId, getAnalytics]);
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4 }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', mt: 4, p: 2 }}>
       <Typography variant="h4" gutterBottom>
         Photo Analytics
       </Typography>
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {analytics.length > 0 ? (
-        <Table sx={{ mt: 2 }}>
-          <TableHead>
-            <TableRow>
-              <TableCell>Score</TableCell>
-              <TableCell>Rated At</TableCell>
-              <TableCell>Rater Gender</TableCell>
-              <TableCell>Rater Age</TableCell>
-              <TableCell>Rater City</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {analytics.map((entry, index) => (
-              <TableRow key={index}>
-                <TableCell>{entry.score}</TableCell>
-                <TableCell>{new Date(entry.ratedAt).toLocaleString()}</TableCell>
-                <TableCell>{entry.rater.gender}</TableCell>
-                <TableCell>{entry.rater.age}</TableCell>
-                <TableCell>{entry.rater.city}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : !loading && !error ? (
-        <Typography variant="body1" sx={{ mt: 2 }}>
-          No analytics available for this photo.
-        </Typography>
-      ) : null}
+
+      {loading && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {error && !loading && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {!loading && !error && analytics.length === 0 && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          No analytics data available for this photo.
+        </Alert>
+      )}
+
+      {!loading && !error && analytics.length > 0 && (
+        <>
+          <AnalyticsSummary analytics={analytics} />
+          <ScoreChart analytics={analytics} />
+          <AnalyticsTable analytics={analytics} />
+        </>
+      )}
     </Box>
   );
 };

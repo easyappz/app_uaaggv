@@ -11,6 +11,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import UploadPhotoPage from './pages/UploadPhotoPage';
 import RatePhotoPage from './pages/RatePhotoPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import UserPhotosPage from './pages/UserPhotosPage';
 import RatingPage from './pages/RatingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
@@ -80,6 +81,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-photos"
+              element={
+                <ProtectedRoute>
+                  <UserPhotosPage />
                 </ProtectedRoute>
               }
             />
