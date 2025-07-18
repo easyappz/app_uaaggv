@@ -11,6 +11,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import UploadPhotoPage from './pages/UploadPhotoPage';
 import RatePhotoPage from './pages/RatePhotoPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import RatingPage from './pages/RatingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -63,6 +64,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <RatePhotoPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rating"
+              element={
+                <ProtectedRoute>
+                  <RatingPage />
                 </ProtectedRoute>
               }
             />
