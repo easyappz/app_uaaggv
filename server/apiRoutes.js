@@ -130,6 +130,10 @@ router.post('/upload-photo', async (req, res) => {
       return res.status(403).json({ error: 'Not enough points to upload photo for evaluation' });
     }
 
+    // Deduct 1 point for uploading a photo
+    user.points -= 1;
+    await user.save();
+
     const photo = new Photo({
       userId,
       url: photoUrl,
@@ -137,7 +141,7 @@ router.post('/upload-photo', async (req, res) => {
     });
 
     await photo.save();
-    res.status(201).json({ message: 'Photo uploaded successfully', photoId: photo._id });
+    res.status(201).json({ message: 'Photo uploaded successfully', photoId: photo._id, points: user.points });
   } catch (error) {
     console.error('Photo upload error:', error);
     res.status(500).json({ error: 'Photo upload failed' });
@@ -193,6 +197,12 @@ router.post('/submit-rating', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
+    // Check if the user has already rated this photo
+    const existingRating = await Rating.findOne({ userId, photoId });
+    if (existingRating) {
+      return res.status(403).json({ error: 'You have already rated this photo' });
+    }
+
     const rating = new Rating({
       photoId,
       userId,
@@ -201,8 +211,17 @@ router.post('/submit-rating', async (req, res) => {
     });
 
     await rating.save();
+
+    // Increment user points by 1 for rating a photo
     user.points += 1;
     await user.save();
+
+    // Check if the photo has received enough ratings to be marked as evaluated
+    const ratingCount = await Rating.countDocuments({ photoId });
+    if (ratingCount >= 5) { // Arbitrary threshold for marking as evaluated
+      photo.isEvaluated = true;
+      await photo.save();
+    }
 
     res.status(201).json({ message: 'Rating submitted successfully', points: user.points });
   } catch (error) {
