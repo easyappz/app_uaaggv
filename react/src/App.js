@@ -11,6 +11,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import UploadPhotoPage from './pages/UploadPhotoPage';
 import RatePhotoPage from './pages/RatePhotoPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 const theme = createTheme({
@@ -49,9 +50,30 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password-request" element={<ResetPasswordRequestPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/upload" element={<UploadPhotoPage />} />
-            <Route path="/rate" element={<RatePhotoPage />} />
-            <Route path="/analytics/:photoId" element={<AnalyticsPage />} />
+            <Route
+              path="/upload"
+              element={
+                <ProtectedRoute>
+                  <UploadPhotoPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/rate"
+              element={
+                <ProtectedRoute>
+                  <RatePhotoPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/analytics/:photoId"
+              element={
+                <ProtectedRoute>
+                  <AnalyticsPage />
+                </ProtectedRoute>
+              }
+            />
           </Route>
         </Routes>
       </ThemeProvider>
